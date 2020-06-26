@@ -114,7 +114,7 @@ class App extends React.Component {
 
     return (      
       <div>        
-        <input type="file" onChange={this.handleChange} multiple/>      
+        <input type="file" accept=".jpg,.jpeg,.png" onChange={this.handleChange} multiple/>      
         {/* <Player
           playsInline
           src={this.state.file}
