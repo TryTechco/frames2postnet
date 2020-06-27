@@ -19,7 +19,10 @@ class App extends React.Component {
   handleChange(event) {    
     var files = []
     Array.from(event.target.files).map(file => { 
-      files.push(URL.createObjectURL(file))
+      files.push({
+        name: file.name,
+        url: URL.createObjectURL(file)
+      })
     });
     this.setState({      
       file: files
@@ -49,18 +52,21 @@ class App extends React.Component {
         const imageElements = document.getElementsByClassName("video-frame");
 
         const results = Promise.all(Array.from(imageElements).map(async imageElement => {
-          const imageScaleFactor = 0.50;
-          const flipHorizontal = false;
-          const outputStride = 16;
           
           // load the posenet model from a checkpoint
           const net = await posenet.load();
     
-          const pose = await net.estimateSinglePose(imageElement, imageScaleFactor, flipHorizontal, outputStride);
+          const pose = await net.estimateSinglePose(imageElement, {
+            flipHorizontal: false
+          });
 
+          console.log(imageElement)
           console.log(pose)
     
-          return pose;
+          return {
+            id: parseInt(imageElement.id),
+            pose: pose
+          };
         }))
     
         resolve(results);
@@ -70,7 +76,13 @@ class App extends React.Component {
     estimatePoses().then(poses => {
       console.log("done");
 
-      this.setState({poses: poses})
+      console.log(poses.sort((a, b) => (a.id > b.id) ? 1 : -1))
+
+      const newposes = poses.sort((a, b) => (a.id > b.id) ? 1 : -1).map(pose => {
+        return pose.pose;
+      })
+
+      this.setState({poses: newposes})
     })
   }
 
@@ -101,8 +113,8 @@ class App extends React.Component {
     var downloadbtn = null
     if(this.state.file)
     {
-      frames = this.state.file.map(f => {
-        return <img className='video-frame' src={f}/>
+      frames = this.state.file.map((f, index) => {
+        return <img className='video-frame' id={index} src={f.url}/>
       })
     }
 
