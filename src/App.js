@@ -54,7 +54,12 @@ class App extends React.Component {
         const results = Promise.all(Array.from(imageElements).map(async imageElement => {
           
           // load the posenet model from a checkpoint
-          const net = await posenet.load();
+          const net = await posenet.load({
+            architecture: 'ResNet50',
+            outputStride: 32,
+            inputResolution: { width: 1920, height: 1080 },
+            quantBytes: 2
+          });
     
           const pose = await net.estimateSinglePose(imageElement, {
             flipHorizontal: false
